@@ -2,16 +2,33 @@ name: Build & Oush
 
 on:
   push:
-    branches: [ "test" ]
+    branches: ["test"]
   workflow_dispatch:
 
 jobs:
-
   build-and-push:
-
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - name: Clonar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Docker login
+        env:
+          DOCKER_USER: ${{secrets.DOCKER_USER}}
+          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+        run: |
+          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: tcambafp/dap-app:latest
+
+      - name: Ejecutar el contenedor
+        run: |
+          docker stop web-container || true
+          docker rm web-container || true
+          docker run -d --name web-container -p 8888:80 ${{ secrets.DOCKERHUB_USERNAME }}/daw-web:latest
