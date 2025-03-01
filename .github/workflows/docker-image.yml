@@ -27,10 +27,10 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/daw-web:latest
+          tags: olivaresiago/daw-web:latest
 
       - name: Ejecutar el contenedor
         run: |
           docker stop web-container || true
           docker rm web-container || true
-          docker run -d --name web-container -p 8888:80 ${{ secrets.DOCKERHUB_USERNAME }}/daw-web:latest
+          docker run -d --name web-container -p 8888:80 olivaresiago/daw-web:latest
